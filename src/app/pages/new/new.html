@@ -1,0 +1,42 @@
+<h2>Nueva serie</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="form">
+    <label>
+        Title
+        <input type="text" formControlName="title" />
+    </label>
+    @if (titleCtrl.touched && titleCtrl.invalid) {
+        <small class="error">
+        @if (titleCtrl.errors?.['required']) { El título es obligatorio. }
+        @if (titleCtrl.errors?.['minlength']) { Mínimo 3 caracteres. }
+        </small>
+    }
+
+    <label>
+        Channel
+        <input type="text" formControlName="channel" />
+    </label>
+        @if (channelCtrl.touched && channelCtrl.invalid) {
+        <small class="error">El canal es obligatorio.</small>
+    }
+
+    <label>
+        Rating (0 a 10)
+        <input type="number" formControlName="rating" min="0" max="10" />
+    </label>
+    @if (ratingCtrl.touched && ratingCtrl.invalid) {
+        <small class="error">Rating obligatorio entre 0 y 10.</small>
+    }
+
+    <button type="submit" [disabled]="form.invalid || submitting()">
+        Crear
+    </button>
+    </form>
+
+@if (createdId() !== null) {
+    <p class="ok"> Serie creada. ID devuelto: {{ createdId() }}</p>
+    }
+
+@if (apiError()) {
+    <p class="error">{{ apiError() }}</p>
+}

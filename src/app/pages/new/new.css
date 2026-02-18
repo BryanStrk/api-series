@@ -1,0 +1,8 @@
+.form { display: grid; gap: 12px; max-width: 420px; }
+input { padding: 8px; border: 1px solid #ddd; border-radius: 6px; }
+button { padding: 10px 12px; border-radius: 6px; border: 1px solid #ddd; cursor: pointer; }
+button[disabled] { opacity: 0.6; cursor: not-allowed; }
+.error { color: #b00020; }
+.ok { color: #0b6b0b; font-weight: 600; }
+small { display:block; margin-top: 4px; }
+

@@ -1,0 +1,17 @@
+<h2>Listado de series</h2>
+
+@if (loading()) {
+    <p>Cargando...</p>
+} @else if (error()) {
+    <p class="error">{{ error() }}</p>
+} @else {
+    <ul class="list">
+        @for (s of series(); track s.id) {
+            <li class="item">
+            <strong>{{ s.title }}</strong>
+            <div>Canal: {{ s.channel }}</div>
+            <div>Rating: {{ s.rating }}</div>
+        </li>
+        }
+    </ul>
+}
