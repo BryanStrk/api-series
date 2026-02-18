@@ -1,0 +1,58 @@
+name: Deploy Angular to VPS
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Angular (production)
+        run: npx ng build --configuration production
+
+      - name: Detect dist folder
+        id: dist
+        run: |
+          BROWSER_DIR=$(find dist -type d -name browser | head -n 1 || true)
+          if [ -n "$BROWSER_DIR" ]; then
+            echo "dir=$BROWSER_DIR" >> $GITHUB_OUTPUT
+          else
+            SUBDIR=$(find dist -mindepth 1 -maxdepth 1 -type d | head -n 1 || true)
+            if [ -n "$SUBDIR" ]; then
+              echo "dir=$SUBDIR" >> $GITHUB_OUTPUT
+            else
+              echo "dir=dist" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Deploy via SSH (clean + upload)
+        env:
+          HOST: ${{ secrets.VPS_HOST }}
+          USER: ${{ secrets.VPS_USER }}
+          KEY: ${{ secrets.VPS_SSH_KEY }}
+          TARGET: ${{ secrets.VPS_PATH }}
+          DIST_DIR: ${{ steps.dist.outputs.dir }}
+        run: |
+          echo "$KEY" > key.pem
+          chmod 600 key.pem
+
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
+
+          ssh -i key.pem "$USER@$HOST" "rm -rf $TARGET/*"
+          scp -i key.pem -r "$DIST_DIR"/. "$USER@$HOST:$TARGET/"
+
+          rm -f key.pem
